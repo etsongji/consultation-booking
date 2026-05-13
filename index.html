@@ -931,7 +931,13 @@ function initializeSystem() {
       .setFontWeight('bold')
       .setBackground('#1a5276')
       .setFontColor('#ffffff');
-    sheet.setColumnWidths(1, 7, [110, 90, 90, 90, 120, 120, 200]);
+    sheet.setColumnWidth(1, 110);
+    sheet.setColumnWidth(2, 90);
+    sheet.setColumnWidth(3, 90);
+    sheet.setColumnWidth(4, 90);
+    sheet.setColumnWidth(5, 120);
+    sheet.setColumnWidth(6, 120);
+    sheet.setColumnWidth(7, 200);
   }
 
   let total = 0;
@@ -1307,13 +1313,13 @@ function render(r){
       var done=x.status==='예약완료',t=x.startTime+' ~ '+x.endTime;
       h+='<div class="slot-card'+(done?' disabled':'')+'"><div class="slot-time">🕐 '+t+'</div><div style="flex:1"></div>'+
         (done?'<span class="slot-done">예약완료</span>':
-        '<button class="btn-reserve" onclick="open('+x.rowNum+',\\''+x.date+'\\',\\''+t+'\\')">예약하기</button>')+
+        '<button class="btn-reserve" onclick="openModal('+x.rowNum+',\\''+x.date+'\\',\\''+t+'\\')">예약하기</button>')+
         '</div>';
     });
   });
   c.innerHTML=h;
 }
-function open(r,d,t){row=r;ttime=d+' '+t;
+function openModal(r,d,t){row=r;ttime=d+' '+t;
   document.getElementById('modal').innerHTML=
     '<h3>📝 상담 예약 신청</h3><div class="mtime">📅 '+ttime+'</div>'+
     '<div class="fg"><label>학생 이름 <span style="color:var(--accent)">*</span></label>'+

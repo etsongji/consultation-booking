@@ -1339,11 +1339,11 @@ function sub(){
   var s=document.getElementById('is').value.trim(),
       p=document.getElementById('ip').value.trim(),
       e=document.getElementById('ie').value.trim(),
-      re=/^[^\s@]+@[^\s@]+\.[^\s@]+$/,err=false;
+      err=false;
   function setE(id,eid,v){document.getElementById(eid).style.display=v?'none':'block';document.getElementById(id).classList.toggle('err',!v);}
   setE('is','es',s);if(!s)err=true;
   setE('ip','ep',p);if(!p)err=true;
-  if(e&&!re.test(e)){document.getElementById('ee').style.display='block';document.getElementById('ie').classList.add('err');err=true;}
+  if(e&&e.indexOf('@')<1){document.getElementById('ee').style.display='block';document.getElementById('ie').classList.add('err');err=true;}
   else{document.getElementById('ee').style.display='none';document.getElementById('ie').classList.remove('err');}
   if(err)return;
   var b=document.getElementById('bok');b.disabled=true;b.textContent='처리 중...';

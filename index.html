@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학부모 상담 예약 시스템 — 코드 생성기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1a5276;
+      --primary-light: #2e86c1;
+      --primary-pale: #ebf5fb;
+      --accent: #e74c3c;
+      --success: #27ae60;
+      --success-pale: #eafaf1;
+      --warn: #f39c12;
+      --warn-pale: #fef9e7;
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --text: #1a252f;
+      --text-muted: #6b7c93;
+      --text-light: #a0aec0;
+      --border: #dce3ec;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+      --radius: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── 헤더 ── */
+    .site-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      padding: 48px 24px 40px;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .site-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .site-header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .site-header h1 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .site-header p {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      font-weight: 300;
+      position: relative;
+    }
+
+    /* ── 레이아웃 ── */
+    .main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* ── 진행 단계 표시 ── */
+    .stepper {
+      display: flex;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      position: relative;
+    }
+    .step-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 60%;
+      right: -40%;
+      height: 2px;
+      background: var(--border);
+      transition: background 0.4s;
+    }
+    .step-item.done:not(:last-child)::after,
+    .step-item.active:not(:last-child)::after {
+      background: var(--primary-light);
+    }
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      color: var(--text-light);
+      transition: all 0.3s;
+      z-index: 1;
+    }
+    .step-item.active .step-circle {
+      border-color: var(--primary-light);
+      background: var(--primary-light);
+      color: white;
+    }
+    .step-item.done .step-circle {
+      border-color: var(--success);
+      background: var(--success);
+      color: white;
+    }
+    .step-label {
+      font-size: 0.72rem;
+      color: var(--text-light);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .step-item.active .step-label { color: var(--primary-light); font-weight: 500; }
+    .step-item.done .step-label { color: var(--success); }
+
+    /* ── 카드 ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius);
+      background: var(--primary-pale);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .card-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .card-header p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .card-body { padding: 24px; }
+
+    /* ── 폼 ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .form-group label .req { color: var(--accent); }
+    .form-group label .opt {
+      font-size: 0.73rem;
+      color: var(--text-light);
+      font-weight: 400;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      padding: 10px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.92rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--text);
+      background: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      width: 100%;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(46,134,193,0.1);
+    }
+    .form-group input.invalid { border-color: var(--accent); }
+    .form-group textarea { resize: vertical; min-height: 72px; }
+    .form-group .hint {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+    .form-group .err-msg {
+      font-size: 0.75rem;
+      color: var(--accent);
+      display: none;
+    }
+    .form-group.has-error .err-msg { display: block; }
+    .form-group.has-error input { border-color: var(--accent); }
+
+    /* ── 슬롯 빌더 ── */
+    .slot-section {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .slot-section-header {
+      background: #f8fafc;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #slotRows { padding: 8px 12px; }
+    .slot-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 80px 36px;
+      gap: 8px;
+      align-items: end;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f4f8;
+    }
+    .slot-row:last-child { border-bottom: none; }
+    .slot-field label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    .slot-field input {
+      padding: 8px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--text);
+      width: 100%;
+      outline: none;
+    }
+    .slot-field input:focus { border-color: var(--primary-light); }
+    .btn-del-slot {
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      font-size: 1rem;
+      transition: all 0.15s;
+    }
+    .btn-del-slot:hover { border-color: var(--accent); color: var(--accent); background: #fdf0ef; }
+    .btn-add-slot {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-top: 1px dashed var(--border);
+      background: #f8fafc;
+      font-size: 0.83rem;
+      color: var(--primary-light);
+      font-family: 'Noto Sans KR', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-add-slot:hover { background: var(--primary-pale); }
+
+    /* ── 네비게이션 ── */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+    }
+    .btn-prev, .btn-next {
+      padding: 11px 24px;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-prev {
+      background: white;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+    }
+    .btn-prev:hover { border-color: var(--text-muted); color: var(--text); }
+    .btn-next {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border: none;
+      color: white;
+      box-shadow: 0 3px 12px rgba(26,82,118,0.3);
+    }
+    .btn-next:hover { opacity: 0.9; box-shadow: 0 4px 16px rgba(26,82,118,0.4); transform: translateY(-1px); }
+
+    /* ── 코드 출력 ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: #f8fafc;
+    }
+    .tab-btn {
+      padding: 12px 20px;
+      font-size: 0.85rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 500;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      color: var(--primary-light);
+      border-bottom-color: var(--primary-light);
+      background: white;
+    }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+    .code-wrap {
+      position: relative;
+      background: #1a252f;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+    .code-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: #243342;
+      border-bottom: 1px solid #2d4155;
+    }
+    .code-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #7fb3d3;
+    }
+    .btn-copy {
+      padding: 5px 14px;
+      border: 1px solid #3d5a73;
+      border-radius: 6px;
+      background: transparent;
+      color: #a8c8e1;
+      font-size: 0.78rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-copy:hover { background: #2d4155; color: white; border-color: #5b8db8; }
+    .btn-copy.copied { background: var(--success); border-color: var(--success); color: white; }
+    .code-content {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #c8d8e4;
+      padding: 16px;
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 400px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    /* ── 가이드 ── */
+    .guide-body { padding: 20px 24px; }
+    .guide-step {
+      display: flex;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f4f8;
+    }
+    .guide-step:last-child { border-bottom: none; }
+    .guide-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary-pale);
+      color: var(--primary);
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .guide-text { font-size: 0.87rem; color: var(--text); line-height: 1.7; }
+    .guide-text strong { color: var(--primary); }
+    .guide-text code {
+      background: #f0f4f8;
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--primary);
+    }
+    .caution {
+      margin-top: 14px;
+      background: var(--warn-pale);
+      border-left: 4px solid var(--warn);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      color: #7d6608;
+      line-height: 1.7;
+    }
+
+    /* ── 알림/뱃지 ── */
+    .notice {
+      background: var(--primary-pale);
+      border-left: 4px solid var(--primary-light);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      color: var(--primary);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    /* ── 반응형 ── */
+    @media (max-width: 580px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .full { grid-column: 1; }
+      .slot-row { grid-template-columns: 1fr 1fr; }
+      .slot-row .slot-field:nth-child(3),
+      .slot-row .slot-field:nth-child(4) { display: none; }
+      .btn-del-slot { grid-column: 2; justify-self: end; }
+      .stepper .step-label { display: none; }
+      .site-header h1 { font-size: 1.3rem; }
+    }
+
+    /* 스텝 표시/숨김 */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="badge">📋 Google Apps Script 웹앱 코드 생성기</div>
+  <h1>📅 학부모 상담 예약 시스템</h1>
+  <p>정보를 입력하면 바로 배포할 수 있는 코드를 생성해드립니다</p>
+</div>
+
+<div class="main">
+
+  <!-- 스텝 표시 -->
+  <div class="stepper" id="stepper">
+    <div class="step-item active" data-step="0">
+      <div class="step-circle">1</div>
+      <div class="step-label">기본 정보</div>
+    </div>
+    <div class="step-item" data-step="1">
+      <div class="step-circle">2</div>
+      <div class="step-label">장소·안내문</div>
+    </div>
+    <div class="step-item" data-step="2">
+      <div class="step-circle">3</div>
+      <div class="step-label">시간대 설정</div>
+    </div>
+    <div class="step-item" data-step="3">
+      <div class="step-circle">4</div>
+      <div class="step-label">코드 생성</div>
+    </div>
+  </div>
+
+  <!-- Step 1: 기본 정보 -->
+  <div class="step-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">👤</div>
+        <div>
+          <h2>선생님 기본 정보</h2>
+          <p>확인 메일과 예약 페이지에 표시될 정보입니다</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>선생님 성함 <span class="req">*</span></label>
+            <input type="text" id="teacherName" placeholder="예: 홍길동">
+            <div class="err-msg">이름을 입력해주세요.</div>
+          </div>
+          <div class="form-group">
+            <label>소속 학교명 <span class="req">*</span></label>
+            <input type="text" id="schoolName" placeholder="예: ○○고등학교">
+            <div class="err-msg">학교명을 입력해주세요.</div>
+          </div>
+          <div class="form-group full">
+            <label>Google 계정 이메일 <span class="req">*</span></label>
+            <input type="email" id="googleAccount" placeholder="예: teacher@gmail.com">
+            <div class="hint">캘린더 연동 및 Apps Script 실행에 사용되는 계정입니다. 스프레드시트 소유자 계정을 입력하세요.</div>
+            <div class="err-msg">올바른 이메일을 입력해주세요.</div>
+          </div>
+          <div class="form-group full">
+            <label>학부모 공개용 연락처 <span class="opt">(선택)</span></label>
+            <input type="tel" id="teacherPhone" placeholder="예: 010-0000-0000">
+            <div class="hint">학부모님께 발송되는 확인 이메일 하단에 표시됩니다. 공개를 원하지 않으시면 비워두세요.</div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <div></div>
+          <button class="btn-next" onclick="goNext(0)">다음 단계 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: 장소·안내문 -->
+  <div class="step-panel" id="panel-1">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📍</div>
+        <div>
+          <h2>상담 장소 · 안내문</h2>
+          <p>예약 페이지와 확인 메일에 표시됩니다</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>상담 장소 <span class="req">*</span></label>
+            <input type="text" id="location" placeholder="예: 2학년 3반 교실 / 상담실 201호">
+            <div class="err-msg">상담 장소를 입력해주세요.</div>
+          </div>
+          <div class="form-group full">
+            <label>예약 페이지 안내문</label>
+            <textarea id="infoMsg" rows="3" placeholder="예약 후 변경·취소가 필요하신 경우 담임선생님께 직접 연락 부탁드립니다.&#10;예약이 완료되면 구글 캘린더에 자동으로 등록됩니다."></textarea>
+            <div class="hint">비워두면 기본 안내문이 사용됩니다.</div>
+          </div>
+          <div class="form-group full">
+            <label>추가 안내사항 <span class="opt">(선택)</span></label>
+            <textarea id="extraMsg" rows="2" placeholder="예: 주차는 학교 정문 주차장을 이용해 주세요."></textarea>
+            <div class="hint">확인 이메일 하단에 추가됩니다.</div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="btn-prev" onclick="goPrev(1)">← 이전</button>
+          <button class="btn-next" onclick="goNext(1)">다음 단계 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: 시간대 설정 -->
+  <div class="step-panel" id="panel-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🕐</div>
+        <div>
+          <h2>기본 상담 시간대 설정</h2>
+          <p>배포 후 스프레드시트에서 언제든지 추가·수정할 수 있습니다</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="notice">
+          날짜 · 시작 · 종료 시간 · 간격(분)을 입력하면 해당 시간대가 자동으로 분할되어 생성됩니다.<br>
+          예) 14:00 ~ 17:00, 20분 간격 → 9개 슬롯 자동 생성
+        </div>
+        <div class="slot-section">
+          <div class="slot-section-header">
+            📅 상담 일정 목록
+          </div>
+          <div id="slotRows"></div>
+          <button class="btn-add-slot" onclick="addSlot()">+ 상담 일정 추가</button>
+        </div>
+        <div class="nav-row">
+          <button class="btn-prev" onclick="goPrev(2)">← 이전</button>
+          <button class="btn-next" onclick="goNext(2)">코드 생성 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: 코드 생성 -->
+  <div class="step-panel" id="panel-3">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">⚡</div>
+        <div>
+          <h2>생성된 코드</h2>
+          <p>아래 코드를 Google Apps Script에 붙여넣고 배포하세요</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('gs')">Code.gs</button>
+        <button class="tab-btn" onclick="switchTab('html')">index.html</button>
+        <button class="tab-btn" onclick="switchTab('guide')">📖 배포 가이드</button>
+      </div>
+
+      <div id="tab-gs" class="tab-pane active">
+        <div class="code-wrap">
+          <div class="code-toolbar">
+            <span class="code-filename">Code.gs</span>
+            <button class="btn-copy" onclick="copyTab('gs')" id="copy-gs">📋 복사</button>
+          </div>
+          <div class="code-content" id="out-gs"></div>
+        </div>
+      </div>
+
+      <div id="tab-html" class="tab-pane">
+        <div class="code-wrap">
+          <div class="code-toolbar">
+            <span class="code-filename">index.html</span>
+            <button class="btn-copy" onclick="copyTab('html')" id="copy-html">📋 복사</button>
+          </div>
+          <div class="code-content" id="out-html"></div>
+        </div>
+      </div>
+
+      <div id="tab-guide" class="tab-pane">
+        <div class="guide-body">
+          <div class="guide-step">
+            <div class="guide-num">1</div>
+            <div class="guide-text"><strong>Google Sheets 새 파일 생성</strong><br>
+              <a href="https://sheets.new" target="_blank">sheets.new</a> 에 접속해 새 스프레드시트를 만드세요. 이름은 자유롭게 지정하세요.</div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">2</div>
+            <div class="guide-text"><strong>Apps Script 열기</strong><br>
+              상단 메뉴 → <strong>확장 프로그램 → Apps Script</strong> 클릭</div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">3</div>
+            <div class="guide-text"><strong>Code.gs 교체</strong><br>
+              기존 코드 전체 삭제 → <strong>Code.gs 탭</strong>의 코드 붙여넣기 → 저장(Ctrl+S)</div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">4</div>
+            <div class="guide-text"><strong>index.html 파일 추가</strong><br>
+              왼쪽 파일 목록 <strong>+</strong> 클릭 → <strong>HTML</strong> 선택 → 파일명 <code>index</code> 입력 → index.html 탭 코드 붙여넣기 → 저장</div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">5</div>
+            <div class="guide-text"><strong>시스템 초기화 실행 (최초 1회)</strong><br>
+              함수 선택창에서 <code>initializeSystem</code> 선택 → ▶ 실행<br>
+              권한 요청 팝업 → <strong>권한 검토 → 고급 → 안전하지 않은 페이지로 이동</strong> → 허용<br>
+              완료 후 스프레드시트에 예약현황 시트와 초기 시간표가 자동 생성됩니다.</div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">6</div>
+            <div class="guide-text"><strong>웹앱 배포</strong><br>
+              상단 <strong>배포 → 새 배포 → 웹 앱</strong> 선택<br>
+              → 액세스: <strong>모든 사용자</strong> → 배포 클릭</div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">7</div>
+            <div class="guide-text"><strong>URL 공유</strong><br>
+              생성된 웹 앱 URL을 복사해 학부모님께 공유하세요.</div>
+          </div>
+          <div class="caution">
+            ⚠️ <strong>코드 수정 후 재배포 시</strong>: 배포 → 배포 관리 → ✏️ 아이콘 → 버전: <strong>새 버전</strong> 선택 후 배포해야 변경사항이 반영됩니다.
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 16px 24px; border-top: 1px solid var(--border);">
+        <div class="nav-row">
+          <button class="btn-prev" onclick="goPrev(3)">← 이전으로</button>
+          <span style="font-size:0.8rem;color:var(--text-light)">코드를 복사해 Google Apps Script에 붙여넣으세요</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- footer -->
+<div style="text-align:center;padding:24px;font-size:0.78rem;color:var(--text-light)">
+  학부모 상담 예약 시스템 코드 생성기 · Google Apps Script 기반
+</div>
+
+<script>
+// ── 상태 ──────────────────────────────────────────
+let currentStep = 0;
+let slotCount = 0;
+const CODE = { gs: '', html: '' };
+
+// ── 스텝 이동 ─────────────────────────────────────
+function goNext(from) {
+  if (!validateStep(from)) return;
+  if (from === 2) buildCode();
+  document.getElementById('panel-' + from).classList.remove('active');
+  currentStep = from + 1;
+  document.getElementById('panel-' + currentStep).classList.add('active');
+  updateStepper();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goPrev(from) {
+  document.getElementById('panel-' + from).classList.remove('active');
+  currentStep = from - 1;
+  document.getElementById('panel-' + currentStep).classList.add('active');
+  updateStepper();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateStepper() {
+  document.querySelectorAll('.step-item').forEach(function(el, i) {
+    el.classList.remove('active', 'done');
+    if (i < currentStep) el.classList.add('done');
+    else if (i === currentStep) el.classList.add('active');
+  });
+  // done 스텝의 circle을 체크 아이콘으로
+  document.querySelectorAll('.step-item.done .step-circle').forEach(function(el) {
+    if (!el.dataset.orig) el.dataset.orig = el.textContent;
+    el.textContent = '✓';
+  });
+  document.querySelectorAll('.step-item:not(.done) .step-circle').forEach(function(el) {
+    if (el.dataset.orig) el.textContent = el.dataset.orig;
+  });
+}
+
+// ── 유효성 검사 ───────────────────────────────────
+function validateStep(step) {
+  let ok = true;
+  if (step === 0) {
+    ok = requireField('teacherName') & requireField('schoolName') & requireEmail('googleAccount');
+  } else if (step === 1) {
+    ok = requireField('location');
+  }
+  return !!ok;
+}
+
+function requireField(id) {
+  const el = document.getElementById(id);
+  const grp = el.closest('.form-group');
+  if (!el.value.trim()) {
+    grp.classList.add('has-error');
+    el.classList.add('invalid');
+    return false;
+  }
+  grp.classList.remove('has-error');
+  el.classList.remove('invalid');
+  return true;
+}
+
+function requireEmail(id) {
+  const el = document.getElementById(id);
+  const grp = el.closest('.form-group');
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+  if (!ok) { grp.classList.add('has-error'); el.classList.add('invalid'); return false; }
+  grp.classList.remove('has-error'); el.classList.remove('invalid');
+  return true;
+}
+
+// 입력 시 에러 해제
+document.querySelectorAll('input, textarea').forEach(function(el) {
+  el.addEventListener('input', function() {
+    el.closest('.form-group').classList.remove('has-error');
+    el.classList.remove('invalid');
+  });
+});
+
+// ── 슬롯 빌더 ─────────────────────────────────────
+function addSlot(date, start, end, interval) {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const id = 'slot-' + (slotCount++);
+  const row = document.createElement('div');
+  row.className = 'slot-row';
+  row.id = id;
+  row.innerHTML =
+    '<div class="slot-field"><label>날짜</label><input type="date" class="s-date" value="' + (date || yyyy+'-'+mm+'-'+dd) + '"></div>' +
+    '<div class="slot-field"><label>시작</label><input type="time" class="s-start" value="' + (start || '14:00') + '"></div>' +
+    '<div class="slot-field"><label>종료</label><input type="time" class="s-end" value="' + (end || '17:00') + '"></div>' +
+    '<div class="slot-field"><label>간격(분)</label><input type="number" class="s-interval" value="' + (interval || 20) + '" min="5" max="60" step="5"></div>' +
+    '<button class="btn-del-slot" onclick="document.getElementById(\'' + id + '\').remove()" title="삭제">✕</button>';
+  document.getElementById('slotRows').appendChild(row);
+}
+
+function getSlots() {
+  return Array.from(document.querySelectorAll('.slot-row')).map(function(r) {
+    return {
+      date: r.querySelector('.s-date').value,
+      start: r.querySelector('.s-start').value,
+      end: r.querySelector('.s-end').value,
+      interval: parseInt(r.querySelector('.s-interval').value) || 20
+    };
+  });
+}
+
+// ── 탭 전환 ──────────────────────────────────────
+function switchTab(name) {
+  ['gs', 'html', 'guide'].forEach(function(t, i) {
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+    document.querySelectorAll('.tab-btn')[i].classList.toggle('active', ['gs','html','guide'][i] === name);
+  });
+}
+
+// ── 코드 복사 ─────────────────────────────────────
+function copyTab(name) {
+  const text = CODE[name];
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(function() {
+    const btn = document.getElementById('copy-' + name);
+    btn.textContent = '✓ 복사됨';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = '📋 복사';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+}
+
+// ── 코드 생성 ─────────────────────────────────────
+function buildCode() {
+  const teacherName   = document.getElementById('teacherName').value.trim();
+  const schoolName    = document.getElementById('schoolName').value.trim();
+  const teacherPhone  = document.getElementById('teacherPhone').value.trim();
+  const googleAccount = document.getElementById('googleAccount').value.trim();
+  const location      = document.getElementById('location').value.trim();
+  const infoMsgRaw    = document.getElementById('infoMsg').value.trim();
+  const infoMsg       = infoMsgRaw ||
+    '예약 후 변경·취소가 필요하신 경우 담임선생님께 직접 연락 부탁드립니다.\\n예약이 완료되면 구글 캘린더에 자동으로 등록됩니다.';
+  const extraMsg      = document.getElementById('extraMsg').value.trim();
+  const slots         = getSlots();
+
+  // ── Code.gs ──────────────────────────────────
+  CODE.gs = `// ==============================================
+//  학부모 상담 예약 시스템 — Code.gs
+//  자동 생성일: ${new Date().toLocaleDateString('ko-KR')}
+// ==============================================
+
+// ── 배포 설정 (여기만 수정하세요) ──────────────
+const CONFIG = {
+  teacherName:  "${esc(teacherName)}",
+  schoolName:   "${esc(schoolName)}",
+  teacherPhone: "${esc(teacherPhone)}",
+  googleAccount:"${esc(googleAccount)}",
+  location:     "${esc(location)}",
+  infoMsg:      "${esc(infoMsg)}",
+  extraMsg:     "${esc(extraMsg)}"
+};
+
+// ── 초기 상담 시간 목록 ─────────────────────────
+const INITIAL_SLOTS = ${JSON.stringify(slots, null, 2)};
+
+// ==============================================
+// 1. 웹앱 진입점
+// ==============================================
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('index')
+    .setTitle(CONFIG.schoolName + ' 학부모 상담 예약')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+// ==============================================
+// 2. 시스템 초기화 — 최초 1회 실행
+// ==============================================
+function initializeSystem() {
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  let   sheet = ss.getSheetByName('예약현황');
+  const ui    = SpreadsheetApp.getUi();
+
+  if (sheet && sheet.getLastRow() > 0) {
+    const res = ui.alert('초기화 확인',
+      '이미 데이터가 있습니다. 기존 데이터를 유지하고 시간대만 추가합니다. 계속하시겠습니까?',
+      ui.ButtonSet.YES_NO);
+    if (res !== ui.Button.YES) return;
+  }
+
+  if (!sheet) sheet = ss.insertSheet('예약현황');
+
+  if (sheet.getLastRow() === 0) {
+    const header = ['날짜', '시작시간', '종료시간', '상태', '학부모명', '학생명', '이메일'];
+    sheet.appendRow(header);
+    sheet.getRange(1, 1, 1, 7)
+      .setFontWeight('bold')
+      .setBackground('#1a5276')
+      .setFontColor('#ffffff');
+    sheet.setColumnWidths(1, 7, [110, 90, 90, 90, 120, 120, 200]);
+  }
+
+  let total = 0;
+  INITIAL_SLOTS.forEach(function(s) {
+    if (!s.date || !s.start || !s.end) return;
+    let cur     = new Date(s.date + 'T' + s.start + ':00+09:00');
+    const fin   = new Date(s.date + 'T' + s.end   + ':00+09:00');
+    const delta = (s.interval || 20) * 60000;
+    while (cur < fin) {
+      const nxt = new Date(cur.getTime() + delta);
+      sheet.appendRow([
+        s.date,
+        Utilities.formatDate(cur, 'GMT+9', 'HH:mm'),
+        Utilities.formatDate(nxt, 'GMT+9', 'HH:mm'),
+        ''
+      ]);
+      cur = nxt;
+      total++;
+    }
+  });
+
+  ui.alert('초기화 완료!',
+    total + '개의 상담 시간대가 생성되었습니다.\\n\\n' +
+    '이제 배포 → 새 배포 → 웹 앱을 선택해 배포하세요.\\n' +
+    '액세스 권한을 \\'모든 사용자\\'로 설정해야 학부모님이 접속할 수 있습니다.',
+    ui.ButtonSet.OK);
+}
+
+// ==============================================
+// 공통 유틸
+// ==============================================
+function sheetTimeToHHmm(val) {
+  if (typeof val === 'number') {
+    const tot = Math.floor(Math.round(val * 86400) / 60);
+    return String(Math.floor(tot / 60) % 24).padStart(2, '0') + ':' +
+           String(tot % 60).padStart(2, '0');
+  }
+  if (val instanceof Date)
+    return Utilities.formatDate(val, Session.getScriptTimeZone(), 'HH:mm');
+  return String(val).substring(0, 5);
+}
+
+// ==============================================
+// 3. 예약 가능 시간대 반환
+// ==============================================
+function getAvailableSlots() {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('예약현황');
+    if (!sheet) return { error: "'예약현황' 시트를 찾을 수 없습니다. initializeSystem을 먼저 실행해주세요." };
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return { slots: [] };
+    const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
+    const slots = [];
+    data.forEach(function(row, i) {
+      if (!row[0] || row[0] === '') return;
+      const dateStr = row[0] instanceof Date
+        ? Utilities.formatDate(row[0], Session.getScriptTimeZone(), 'yyyy-MM-dd')
+        : String(row[0]).substring(0, 10);
+      slots.push({
+        rowNum:      i + 2,
+        date:        dateStr,
+        startTime:   sheetTimeToHHmm(row[1]),
+        endTime:     sheetTimeToHHmm(row[2]),
+        status:      row[3] || '',
+        parentName:  row[4] || '',
+        studentName: row[5] || ''
+      });
+    });
+    return {
+      slots,
+      config: { teacherName: CONFIG.teacherName, schoolName: CONFIG.schoolName }
+    };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+// ==============================================
+// 4. 안내문 반환 (프론트에서 호출)
+// ==============================================
+function getInfoMessage() {
+  return CONFIG.infoMsg.replace(/\\\\n/g, '\\n');
+}
+
+// ==============================================
+// 5. 예약 처리
+// ==============================================
+function processReservation(rowNum, parentName, studentName, parentEmail) {
+  try {
+    const email = (parentEmail != null) ? String(parentEmail).trim() : '';
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('예약현황');
+
+    if (sheet.getRange(rowNum, 4).getValue() === '예약완료')
+      return { success: false, message: '이미 예약된 시간대입니다. 다른 시간을 선택해주세요.' };
+
+    const dateVal  = sheet.getRange(rowNum, 1).getValue();
+    const startVal = sheet.getRange(rowNum, 2).getValue();
+    const endVal   = sheet.getRange(rowNum, 3).getValue();
+    const startStr = sheetTimeToHHmm(startVal);
+    const endStr   = sheetTimeToHHmm(endVal);
+    const tz       = Session.getScriptTimeZone();
+    const dateStr  = Utilities.formatDate(
+      dateVal instanceof Date ? dateVal : new Date(dateVal), tz, 'yyyy-MM-dd');
+    const startDt  = new Date(dateStr + 'T' + startStr + ':00+09:00');
+    const endDt    = new Date(dateStr + 'T' + endStr   + ':00+09:00');
+
+    // 캘린더 등록
+    const cal = CalendarApp.getCalendarById('${esc(googleAccount)}') ||
+                CalendarApp.getDefaultCalendar();
+    cal.createEvent(
+      '학부모 상담: ' + studentName + ' (' + parentName + ')',
+      startDt, endDt,
+      {
+        description: [
+          '학생: '  + studentName,
+          '학부모: ' + parentName,
+          email ? '이메일: ' + email : '',
+          '',
+          '장소: ' + CONFIG.location,
+          '',
+          CONFIG.schoolName + ' ' + CONFIG.teacherName + ' 학부모 상담 예약 시스템'
+        ].filter(Boolean).join('\\n'),
+        location: CONFIG.location
+      }
+    );
+
+    // 시트 업데이트
+    sheet.getRange(rowNum, 4).setValue('예약완료');
+    sheet.getRange(rowNum, 5).setValue(parentName);
+    sheet.getRange(rowNum, 6).setValue(studentName);
+    sheet.getRange(rowNum, 7).setValue(email);
+
+    const dDate = Utilities.formatDate(startDt, tz, 'yyyy년 MM월 dd일');
+    const dTime = startStr + ' ~ ' + endStr;
+
+    // 확인 이메일 발송
+    let emailSent = false;
+    if (email && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+      try {
+        sendConfirmationEmail(email, parentName, studentName, dDate, dTime);
+        emailSent = true;
+      } catch (ex) {
+        Logger.log('이메일 발송 실패: ' + ex.message);
+      }
+    }
+
+    return {
+      success:   true,
+      emailSent,
+      message:   '예약이 완료되었습니다!\\n\\n' +
+                 '일시: ' + dDate + ' ' + dTime + '\\n' +
+                 '학생: ' + studentName + '\\n' +
+                 '학부모: ' + parentName + '\\n' +
+                 '장소: ' + CONFIG.location +
+                 (emailSent ? '\\n확인 메일: ' + email : '') +
+                 '\\n\\n구글 캘린더에 자동으로 등록되었습니다.'
+    };
+  } catch (e) {
+    return { success: false, message: '오류가 발생했습니다: ' + e.message };
+  }
+}
+
+// ==============================================
+// 6. 확인 이메일 발송
+// ==============================================
+function sendConfirmationEmail(toEmail, parentName, studentName, dateStr, timeStr) {
+  const subject = '[' + CONFIG.schoolName + '] ' + studentName + ' 학부모 상담 예약 확인';
+  const htmlBody =
+    '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">' +
+    '<style>' +
+    'body{margin:0;padding:0;background:#f4f6f9;font-family:Malgun Gothic,sans-serif}' +
+    '.wrap{max-width:560px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08)}' +
+    '.top{background:linear-gradient(135deg,#1a5276,#2e86c1);padding:32px;color:#fff;text-align:center}' +
+    '.top h1{margin:0 0 6px;font-size:1.2rem}.top p{margin:0;font-size:.82rem;opacity:.85}' +
+    '.body{padding:28px 32px}' +
+    '.badge{display:inline-block;background:#27ae60;color:#fff;padding:4px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:14px}' +
+    '.card{background:#ebf5fb;border-left:4px solid #2e86c1;border-radius:8px;padding:18px 20px;margin-bottom:20px}' +
+    '.crow{display:flex;padding:8px 0;border-bottom:1px solid #d6eaf8;font-size:.88rem}' +
+    '.crow:last-child{border-bottom:none}' +
+    '.cl{color:#2e86c1;font-weight:700;min-width:90px;font-size:.82rem}' +
+    '.cv{color:#2c3e50}' +
+    '.notice{background:#fef9e7;border-left:4px solid #f39c12;border-radius:8px;padding:14px 16px;font-size:.82rem;color:#7d6608;line-height:1.7;margin-bottom:20px}' +
+    '.footer{background:#f4f6f9;padding:18px 32px;text-align:center;font-size:.78rem;color:#95a5a6;line-height:1.7;border-top:1px solid #e8eaed}' +
+    '</style></head><body>' +
+    '<div class="wrap">' +
+    '<div class="top"><h1>[예약 확인] 학부모 상담</h1>' +
+    '<p>' + CONFIG.schoolName + ' ' + CONFIG.teacherName + '</p></div>' +
+    '<div class="body">' +
+    '<p style="font-size:.95rem;color:#2c3e50;margin-bottom:20px;line-height:1.7">' +
+    '안녕하세요, <strong>' + parentName + '</strong> 학부모님.<br>' +
+    '<strong>' + studentName + '</strong> 학생의 학부모 상담 예약이 완료되었습니다.</p>' +
+    '<div class="badge">✓ 예약 확정</div>' +
+    '<div class="card">' +
+    '<div class="crow"><span class="cl">상담 일시</span><span class="cv"><strong>' + dateStr + ' ' + timeStr + '</strong></span></div>' +
+    '<div class="crow"><span class="cl">학생</span><span class="cv">' + studentName + '</span></div>' +
+    '<div class="crow"><span class="cl">학부모</span><span class="cv">' + parentName + '</span></div>' +
+    '<div class="crow"><span class="cl">장소</span><span class="cv">' + CONFIG.location + '</span></div>' +
+    '</div>' +
+    '<div class="notice"><strong>[변경·취소 안내]</strong><br>' +
+    '변경·취소는 ' + CONFIG.teacherName + '께 직접 연락 부탁드립니다.' +
+    (CONFIG.teacherPhone ? '<br>연락처: ' + CONFIG.teacherPhone : '') + '</div>' +
+    (CONFIG.extraMsg ? '<p style="font-size:.85rem;color:#555;line-height:1.7">' + CONFIG.extraMsg + '</p>' : '') +
+    '</div>' +
+    '<div class="footer">본 메일은 학부모 상담 예약 시스템에서 자동 발송된 메일입니다.<br>' +
+    CONFIG.schoolName + ' ' + CONFIG.teacherName + ' 드림</div>' +
+    '</div></body></html>';
+
+  const plain = [
+    '[' + CONFIG.schoolName + '] 학부모 상담 예약 확인', '',
+    parentName + ' 학부모님, 안녕하세요.',
+    studentName + ' 학생의 상담 예약이 완료되었습니다.', '',
+    '[예약 확정]',
+    '- 일시: ' + dateStr + ' ' + timeStr,
+    '- 학생: ' + studentName,
+    '- 학부모: ' + parentName,
+    '- 장소: ' + CONFIG.location, '',
+    '[변경·취소] ' + CONFIG.teacherName + '께 직접 연락 부탁드립니다.',
+    CONFIG.teacherPhone ? '연락처: ' + CONFIG.teacherPhone : '',
+    CONFIG.extraMsg || '', '',
+    CONFIG.schoolName + ' ' + CONFIG.teacherName + ' 드림'
+  ].filter(function(l) { return l !== undefined; }).join('\\n');
+
+  GmailApp.sendEmail(toEmail, subject, plain, {
+    htmlBody,
+    name: CONFIG.schoolName + ' ' + CONFIG.teacherName
+  });
+}
+
+// ==============================================
+// 7. 시간대 추가 (메뉴에서 실행)
+// ==============================================
+function addTimeSlotsMenu() {
+  const ui = SpreadsheetApp.getUi();
+  const r1 = ui.prompt('날짜', 'YYYY-MM-DD 형식:', ui.ButtonSet.OK_CANCEL);
+  if (r1.getSelectedButton() !== ui.Button.OK) return;
+  const r2 = ui.prompt('시작 시간', 'HH:MM (예: 14:00):', ui.ButtonSet.OK_CANCEL);
+  if (r2.getSelectedButton() !== ui.Button.OK) return;
+  const r3 = ui.prompt('종료 시간', 'HH:MM (예: 17:00):', ui.ButtonSet.OK_CANCEL);
+  if (r3.getSelectedButton() !== ui.Button.OK) return;
+  const r4 = ui.prompt('상담 간격(분)', '기본 20분:', ui.ButtonSet.OK_CANCEL);
+  if (r4.getSelectedButton() !== ui.Button.OK) return;
+
+  const date = r1.getResponseText().trim();
+  const st   = r2.getResponseText().trim();
+  const en   = r3.getResponseText().trim();
+  const iv   = parseInt(r4.getResponseText()) || 20;
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('예약현황');
+  let cur = new Date(date + 'T' + st + ':00+09:00');
+  const fin = new Date(date + 'T' + en + ':00+09:00');
+  let cnt = 0;
+  while (cur < fin) {
+    const nxt = new Date(cur.getTime() + iv * 60000);
+    sheet.appendRow([date,
+      Utilities.formatDate(cur, 'GMT+9', 'HH:mm'),
+      Utilities.formatDate(nxt, 'GMT+9', 'HH:mm'), '']);
+    cur = nxt; cnt++;
+  }
+  ui.alert(cnt + '개의 시간대가 추가되었습니다.');
+}
+
+// ==============================================
+// 8. 스프레드시트 메뉴 등록
+// ==============================================
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('📅 상담 관리')
+    .addItem('시간대 추가', 'addTimeSlotsMenu')
+    .addSeparator()
+    .addItem('시스템 초기화 (최초 1회)', 'initializeSystem')
+    .addToUi();
+}`;
+
+  // ── index.html ────────────────────────────────
+  CODE.html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학부모 상담 예약</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--primary:#1a5276;--primary-light:#2e86c1;--accent:#e74c3c;--success:#27ae60;--bg:#f4f6f9;--card:#fff;--text:#2c3e50;--muted:#7f8c8d;--border:#dce3ec;--dis-bg:#f0f2f5;--dis-text:#aab0b8;--shadow:0 2px 12px rgba(0,0,0,.08)}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .header{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:28px 24px 24px;text-align:center;box-shadow:0 2px 10px rgba(26,82,118,.3)}
+    .header h1{font-size:1.4rem;font-weight:700}
+    .header .sub{margin-top:4px;font-size:.83rem;opacity:.85;font-weight:300}
+    .container{max-width:680px;margin:0 auto;padding:20px 16px 40px}
+    .info-box{background:#ebf5fb;border-left:4px solid var(--primary-light);border-radius:6px;padding:12px 16px;margin-bottom:20px;font-size:.82rem;color:var(--primary);line-height:1.7}
+    .info-box strong{display:block;margin-bottom:2px;font-size:.88rem}
+    .loading{text-align:center;padding:48px 0;color:var(--muted)}
+    .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--primary-light);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .date-label{font-size:.8rem;font-weight:700;color:var(--primary);margin:20px 0 8px;display:flex;align-items:center;gap:8px}
+    .date-label::after{content:'';flex:1;height:1px;background:var(--border)}
+    .slot-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+    .slot-card:hover:not(.disabled){transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,0,0,.11)}
+    .slot-card.disabled{background:var(--dis-bg);box-shadow:none;border-color:#e8eaed}
+    .slot-time{font-size:1.05rem;font-weight:700;color:var(--primary);min-width:128px}
+    .slot-card.disabled .slot-time{color:var(--dis-text)}
+    .slot-done{font-size:.78rem;color:var(--dis-text);background:#e8eaed;padding:3px 10px;border-radius:20px;font-weight:500}
+    .btn-reserve{background:var(--primary-light);color:#fff;border:none;padding:9px 20px;border-radius:7px;font-size:.88rem;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:background .2s}
+    .btn-reserve:hover{background:var(--primary)}
+    .empty{text-align:center;padding:48px 0;color:var(--muted);font-size:.9rem}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:16px}
+    .overlay.on{display:flex}
+    .modal{background:#fff;border-radius:14px;padding:28px 24px 24px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.18);animation:up .25s ease}
+    @keyframes up{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .modal h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:4px}
+    .modal .mtime{font-size:.82rem;color:var(--muted);margin-bottom:20px}
+    .fg{margin-bottom:14px}
+    .fg label{display:block;font-size:.82rem;font-weight:600;margin-bottom:5px}
+    .fg input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:7px;font-size:.95rem;font-family:'Noto Sans KR',sans-serif;color:var(--text);outline:none;transition:border-color .2s}
+    .fg input:focus{border-color:var(--primary-light)}
+    .fg input.err{border-color:var(--accent)}
+    .fg .em{color:var(--accent);font-size:.78rem;margin-top:4px;display:none}
+    .mnotice{font-size:.78rem;color:var(--muted);background:var(--bg);border-radius:6px;padding:9px 12px;margin-bottom:18px;line-height:1.6}
+    .mbtns{display:flex;gap:8px}
+    .btn-cancel{flex:1;padding:11px;border:1.5px solid var(--border);border-radius:7px;background:#fff;font-size:.9rem;font-family:'Noto Sans KR',sans-serif;color:var(--muted);cursor:pointer}
+    .btn-ok{flex:2;padding:11px;border:none;border-radius:7px;background:var(--primary);color:#fff;font-size:.9rem;font-family:'Noto Sans KR',sans-serif;font-weight:700;cursor:pointer}
+    .btn-ok:hover{background:var(--primary-light)}
+    .btn-ok:disabled{background:var(--muted);cursor:not-allowed}
+    .sbox{text-align:center;padding:8px 0 4px}
+    .sbox .ico{font-size:2.8rem;margin-bottom:10px}
+    .sbox h3{color:var(--success);font-size:1.1rem;margin-bottom:12px}
+    .sdetail{background:#eafaf1;border-radius:8px;padding:12px 14px;text-align:left;font-size:.85rem;line-height:1.8;color:var(--text);margin-bottom:16px}
+    .btn-close{width:100%;padding:11px;border:none;border-radius:7px;background:var(--success);color:#fff;font-size:.9rem;font-family:'Noto Sans KR',sans-serif;font-weight:700;cursor:pointer}
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1 id="title">📅 학부모 상담 예약 신청</h1>
+  <div class="sub" id="subtitle">원하시는 시간을 선택하고 정보를 입력해주세요</div>
+</div>
+<div class="container">
+  <div class="info-box"><strong>📢 안내사항</strong><span id="infoTxt">불러오는 중...</span></div>
+  <div id="loading" class="loading"><div class="spinner"></div><div>시간표를 불러오는 중...</div></div>
+  <div id="slots"></div>
+</div>
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<script>
+var row=null,ttime='';
+window.onload=function(){
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r.config){
+        document.getElementById('title').textContent='📅 '+r.config.schoolName+' 학부모 상담 예약';
+        document.getElementById('subtitle').textContent=r.config.teacherName+' 선생님 상담 예약 시스템';
+      }
+      render(r);
+    })
+    .withFailureHandler(function(e){document.getElementById('loading').innerHTML='❌ 오류: '+e.message;})
+    .getAvailableSlots();
+  google.script.run
+    .withSuccessHandler(function(m){document.getElementById('infoTxt').innerHTML=m.replace(/\\n/g,'<br>');})
+    .withFailureHandler(function(){})
+    .getInfoMessage();
+};
+function render(r){
+  document.getElementById('loading').style.display='none';
+  var c=document.getElementById('slots');
+  if(r.error){c.innerHTML='<div class="empty">❌ '+r.error+'</div>';return;}
+  var s=r.slots;
+  if(!s||!s.length){c.innerHTML='<div class="empty">📭 등록된 상담 시간이 없습니다.</div>';return;}
+  var g={};s.forEach(function(x){if(!g[x.date])g[x.date]=[];g[x.date].push(x);});
+  var h='',days=['일','월','화','수','목','금','토'];
+  Object.entries(g).forEach(function(e){
+    var d=new Date(e[0]);
+    h+='<div class="date-label">📅 '+e[0]+' ('+days[d.getDay()]+')</div>';
+    e[1].forEach(function(x){
+      var done=x.status==='예약완료',t=x.startTime+' ~ '+x.endTime;
+      h+='<div class="slot-card'+(done?' disabled':'')+'"><div class="slot-time">🕐 '+t+'</div><div style="flex:1"></div>'+
+        (done?'<span class="slot-done">예약완료</span>':
+        '<button class="btn-reserve" onclick="open('+x.rowNum+',\\''+x.date+'\\',\\''+t+'\\')">예약하기</button>')+
+        '</div>';
+    });
+  });
+  c.innerHTML=h;
+}
+function open(r,d,t){row=r;ttime=d+' '+t;
+  document.getElementById('modal').innerHTML=
+    '<h3>📝 상담 예약 신청</h3><div class="mtime">📅 '+ttime+'</div>'+
+    '<div class="fg"><label>학생 이름 <span style="color:var(--accent)">*</span></label>'+
+    '<input id="is" placeholder="예: 홍길동" autocomplete="off"><div class="em" id="es">학생 이름을 입력해주세요.</div></div>'+
+    '<div class="fg"><label>학부모 성함 <span style="color:var(--accent)">*</span></label>'+
+    '<input id="ip" placeholder="예: 홍길동 어머니" autocomplete="off"><div class="em" id="ep">학부모 성함을 입력해주세요.</div></div>'+
+    '<div class="fg"><label>학부모 이메일 <span style="color:#95a5a6;font-weight:400">(선택 — 확인 메일 수신)</span></label>'+
+    '<input type="email" id="ie" placeholder="예: parent@gmail.com" autocomplete="off"><div class="em" id="ee">올바른 이메일 형식을 입력해주세요.</div></div>'+
+    '<div class="mnotice">입력하신 정보는 상담 예약 목적으로만 사용됩니다.</div>'+
+    '<div class="mbtns"><button class="btn-cancel" onclick="cls()">취소</button>'+
+    '<button class="btn-ok" id="bok" onclick="sub()">예약 확정</button></div>';
+  document.getElementById('overlay').classList.add('on');
+  setTimeout(function(){var e=document.getElementById('is');if(e)e.focus();},100);
+}
+function cls(){document.getElementById('overlay').classList.remove('on');}
+function sub(){
+  var s=document.getElementById('is').value.trim(),
+      p=document.getElementById('ip').value.trim(),
+      e=document.getElementById('ie').value.trim(),
+      re=/^[^\s@]+@[^\s@]+\.[^\s@]+$/,err=false;
+  function setE(id,eid,v){document.getElementById(eid).style.display=v?'none':'block';document.getElementById(id).classList.toggle('err',!v);}
+  setE('is','es',s);if(!s)err=true;
+  setE('ip','ep',p);if(!p)err=true;
+  if(e&&!re.test(e)){document.getElementById('ee').style.display='block';document.getElementById('ie').classList.add('err');err=true;}
+  else{document.getElementById('ee').style.display='none';document.getElementById('ie').classList.remove('err');}
+  if(err)return;
+  var b=document.getElementById('bok');b.disabled=true;b.textContent='처리 중...';
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(r.success)succ(r.message,r.emailSent,e);
+      else{alert(r.message);b.disabled=false;b.textContent='예약 확정';cls();refresh();}
+    })
+    .withFailureHandler(function(ex){alert('오류: '+ex.message);b.disabled=false;b.textContent='예약 확정';})
+    .processReservation(row,p,s,e);
+}
+function succ(msg,sent,email){
+  document.getElementById('modal').innerHTML=
+    '<div class="sbox"><div class="ico">✅</div><h3>예약이 완료되었습니다!</h3>'+
+    '<div class="sdetail">'+msg.replace(/\\n/g,'<br>')+'</div>'+
+    (sent?'<div style="font-size:.82rem;color:var(--success);margin-bottom:14px">📧 <strong>'+email+'</strong>으로 확인 메일을 발송했습니다.</div>':'')+
+    '<button class="btn-close" onclick="clsref()">확인</button></div>';
+}
+function clsref(){cls();refresh();}
+function refresh(){
+  document.getElementById('slots').innerHTML='';
+  var l=document.getElementById('loading');l.style.display='block';
+  l.innerHTML='<div class="spinner"></div><div>새로고침 중...</div>';
+  google.script.run.withSuccessHandler(render).withFailureHandler(function(e){l.innerHTML='❌ '+e.message;}).getAvailableSlots();
+}
+<\/script>
+</body>
+</html>`;
+
+  document.getElementById('out-gs').textContent = CODE.gs;
+  document.getElementById('out-html').textContent = CODE.html;
+}
+
+// ── 특수문자 이스케이프 ────────────────────────────
+function esc(s) {
+  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
+}
+
+// ── 초기화 ────────────────────────────────────────
+addSlot();
+</script>
+</body>
+</html>
